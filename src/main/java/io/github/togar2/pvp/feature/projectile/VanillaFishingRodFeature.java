@@ -26,6 +26,7 @@ import net.minestom.server.event.entity.EntityShootEvent;
 import net.minestom.server.event.player.PlayerUseItemEvent;
 import net.minestom.server.event.trait.EntityInstanceEvent;
 import net.minestom.server.item.Material;
+import net.minestom.server.property.ServerProperties;
 import net.minestom.server.sound.SoundEvent;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.utils.MathUtils;
@@ -146,7 +147,7 @@ public class VanillaFishingRodFeature implements FishingRodFeature, RegistrableF
 				}
 				
 				//TODO fix velocity code
-				bobber.setVelocity(velocity.mul(ServerFlag.SERVER_TICKS_PER_SECOND * 0.75));
+				bobber.setVelocity(velocity.mul(ServerProperties.SERVER_TICKS_PER_SECOND.get() * 0.75));
 			}
 		});
 	}

@@ -4,7 +4,6 @@ import io.github.togar2.pvp.events.ExplosionEvent;
 import io.github.togar2.pvp.feature.enchantment.EnchantmentFeature;
 import io.github.togar2.pvp.player.CombatPlayer;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
-import net.minestom.server.ServerFlag;
 import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.collision.CollisionUtils;
 import net.minestom.server.coordinate.BlockVec;
@@ -25,6 +24,7 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.network.packet.server.play.ExplosionPacket;
 import net.minestom.server.particle.Particle;
+import net.minestom.server.property.ServerProperties;
 import net.minestom.server.sound.SoundEvent;
 
 import net.minestom.server.utils.WeightedList;
@@ -86,8 +86,8 @@ public final class VanillaExplosionSupplier implements ExplosionSupplier {
 										Vec position = new Vec(centerX, centerY, centerZ);
 										Block block = instance.getBlock(position);
 
-										if (!block.isAir()) {
-											float explosionResistance = block.registry().explosionResistance();
+										if (!block.air()) {
+											float explosionResistance = block.explosionResistance();
 											strengthLeft -= (explosionResistance + 0.3F) * 0.3F;
 
 											if (strengthLeft > 0.0F) {
@@ -183,7 +183,7 @@ public final class VanillaExplosionSupplier implements ExplosionSupplier {
 									dz * knockback
 							);
 
-							int tps = ServerFlag.SERVER_TICKS_PER_SECOND;
+							int tps = ServerProperties.SERVER_TICKS_PER_SECOND.get();
 							if (entity instanceof Player player) {
 								if (!player.getGameMode().invulnerable() && !player.isFlying()) {
 									playerKnockback.put(player, knockbackVec);
@@ -246,8 +246,8 @@ public final class VanillaExplosionSupplier implements ExplosionSupplier {
 						ThreadLocalRandom random = ThreadLocalRandom.current();
 						for (Point point : blocks) {
 							if (random.nextInt(3) != 0
-									|| !instance.getBlock(point).isAir()
-									|| !instance.getBlock(point.sub(0, 1, 0)).isSolid())
+									|| !instance.getBlock(point).air()
+									|| !instance.getBlock(point.sub(0, 1, 0)).solid())
 								continue;
 
 							instance.setBlock(point, Block.FIRE);

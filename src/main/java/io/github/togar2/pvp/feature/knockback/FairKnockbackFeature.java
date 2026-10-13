@@ -5,13 +5,13 @@ import io.github.togar2.pvp.feature.FeatureType;
 import io.github.togar2.pvp.feature.config.DefinedFeature;
 import io.github.togar2.pvp.feature.config.FeatureConfiguration;
 import io.github.togar2.pvp.player.CombatPlayer;
-import net.minestom.server.ServerFlag;
 import net.minestom.server.collision.Aerodynamics;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.property.ServerProperties;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -133,6 +133,6 @@ public class FairKnockbackFeature extends VanillaKnockbackFeature {
 	}
 	
 	private static int getLatencyTicks(int latencyMillis) {
-		return Math.ceilDiv(latencyMillis * ServerFlag.SERVER_TICKS_PER_SECOND, 1000) + 2;
+		return Math.ceilDiv(latencyMillis * ServerProperties.SERVER_TICKS_PER_SECOND.get(), 1000) + 2;
 	}
 }

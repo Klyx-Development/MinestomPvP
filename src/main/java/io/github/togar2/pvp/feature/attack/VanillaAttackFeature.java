@@ -31,6 +31,7 @@ import net.minestom.server.event.trait.EntityInstanceEvent;
 import net.minestom.server.network.packet.server.play.EntityAnimationPacket;
 import net.minestom.server.network.packet.server.play.ParticlePacket;
 import net.minestom.server.particle.Particle;
+import net.minestom.server.property.ServerProperties;
 import net.minestom.server.sound.SoundEvent;
 import org.jetbrains.annotations.Nullable;
 
@@ -182,7 +183,7 @@ public class VanillaAttackFeature implements AttackFeature, RegistrableFeature {
 
 			if (attack.fireAspect() > 0) {
 				for (LivingEntity entity : affectedEntities) {
-					entity.setFireTicks(attack.fireAspect() * 4 * ServerFlag.SERVER_TICKS_PER_SECOND);
+					entity.setFireTicks(attack.fireAspect() * 4 * ServerProperties.SERVER_TICKS_PER_SECOND.get());
 				}
 			}
 		}

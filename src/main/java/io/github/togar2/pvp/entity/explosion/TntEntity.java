@@ -1,7 +1,6 @@
 package io.github.togar2.pvp.entity.explosion;
 
 import net.kyori.adventure.nbt.CompoundBinaryTag;
-import net.minestom.server.ServerFlag;
 import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
@@ -9,6 +8,7 @@ import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.metadata.other.PrimedTntMeta;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.property.ServerProperties;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.ThreadLocalRandom;
@@ -22,7 +22,7 @@ public class TntEntity extends Entity {
 
 		double angle = ThreadLocalRandom.current().nextDouble() * 2 * Math.PI;
 		setVelocity(new Vec(-Math.sin(angle) * 0.02, 0.2f, -Math.cos(angle) * 0.02)
-				.mul(ServerFlag.SERVER_TICKS_PER_SECOND));
+				.mul(ServerProperties.SERVER_TICKS_PER_SECOND.get()));
 	}
 	
 	public int getFuse() {

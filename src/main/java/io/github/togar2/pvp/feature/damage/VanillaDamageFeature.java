@@ -33,6 +33,7 @@ import net.minestom.server.event.trait.EntityInstanceEvent;
 import net.minestom.server.network.packet.server.play.DamageEventPacket;
 import net.minestom.server.network.packet.server.play.SoundEffectPacket;
 import net.minestom.server.potion.PotionEffect;
+import net.minestom.server.registry.RegistryKey;
 import net.minestom.server.sound.SoundEvent;
 import net.minestom.server.tag.Tag;
 
@@ -185,7 +186,7 @@ public class VanillaDamageFeature implements DamageFeature, RegistrableFeature {
 				// Send damage animation
 				entity.sendPacketToViewersAndSelf(new DamageEventPacket(
 						entity.getEntityId(),
-						MinecraftServer.getDamageTypeRegistry().getId(damage.getType()),
+						damage.getType(),
 						damage.getAttacker() == null ? 0 : damage.getAttacker().getEntityId() + 1,
 						damage.getSource() == null ? 0 : damage.getSource().getEntityId() + 1,
 						null

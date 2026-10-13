@@ -11,6 +11,7 @@ import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerMoveEvent;
 import net.minestom.server.potion.PotionEffect;
 import net.minestom.server.potion.TimedPotion;
+import net.minestom.server.property.ServerProperties;
 
 import java.util.function.Function;
 
@@ -40,7 +41,7 @@ public interface CombatPlayer {
     }
     
     default void jump() {
-        int tps = ServerFlag.SERVER_TICKS_PER_SECOND;
+        int tps = ServerProperties.SERVER_TICKS_PER_SECOND.get();
         double yVel = getJumpVelocity() + getJumpBoostVelocityModifier();
         setVelocityNoUpdate(velocity -> velocity.withY(Math.max(velocity.y(), yVel * tps)));
         if (isSprinting()) {

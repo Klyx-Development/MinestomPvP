@@ -35,7 +35,7 @@ public class CombatPotionEffect {
 		this.potionEffect = potionEffect;
 		this.particleSupplier = potion -> {
 			int alpha = potion.isAmbient() ? 38 : 255;
-			return Particle.ENTITY_EFFECT.withColor(new AlphaColor(alpha, new Color(potion.effect().registry().color())));
+			return Particle.ENTITY_EFFECT.withColor(new AlphaColor(alpha, new Color(potion.effect().color())));
 		};
 	}
 	
@@ -153,7 +153,7 @@ public class CombatPotionEffect {
 	}
 	
 	public boolean isInstant() {
-		return potionEffect.registry().isInstantaneous();
+		return potionEffect.instantaneous();
 	}
 	
 	public void onApplied(LivingEntity entity, int amplifier, CombatVersion version) {

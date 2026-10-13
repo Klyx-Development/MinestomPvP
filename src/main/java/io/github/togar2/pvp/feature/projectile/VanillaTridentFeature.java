@@ -11,7 +11,6 @@ import io.github.togar2.pvp.player.CombatPlayer;
 import io.github.togar2.pvp.utils.FluidUtil;
 import io.github.togar2.pvp.utils.ViewUtil;
 import net.kyori.adventure.sound.Sound;
-import net.minestom.server.ServerFlag;
 import net.minestom.server.component.DataComponents;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
@@ -26,6 +25,7 @@ import net.minestom.server.instance.EntityTracker;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.item.enchant.Enchantment;
+import net.minestom.server.property.ServerProperties;
 import net.minestom.server.sound.SoundEvent;
 import net.minestom.server.tag.Tag;
 
@@ -138,7 +138,7 @@ public class VanillaTridentFeature implements TridentFeature, RegistrableFeature
 				h * (n / length),
 				k * (n / length),
 				l * (n / length)
-		).mul(ServerFlag.SERVER_TICKS_PER_SECOND)));
+		).mul(ServerProperties.SERVER_TICKS_PER_SECOND.get())));
 		
 		SoundEvent soundEvent = level >= 3 ? SoundEvent.ITEM_TRIDENT_RIPTIDE_3 :
 				(level == 2 ? SoundEvent.ITEM_TRIDENT_RIPTIDE_2 : SoundEvent.ITEM_TRIDENT_RIPTIDE_1);

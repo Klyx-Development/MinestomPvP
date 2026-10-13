@@ -1,7 +1,6 @@
 package io.github.togar2.pvp.entity.projectile;
 
 import io.github.togar2.pvp.utils.ProjectileUtil;
-import net.minestom.server.ServerFlag;
 import net.minestom.server.collision.*;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
@@ -14,6 +13,7 @@ import net.minestom.server.event.entity.projectile.ProjectileCollideWithEntityEv
 import net.minestom.server.event.entity.projectile.ProjectileUncollideEvent;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.property.ServerProperties;
 import net.minestom.server.utils.chunk.ChunkCache;
 import net.minestom.server.utils.chunk.ChunkUtils;
 import org.jetbrains.annotations.NotNull;
@@ -133,7 +133,7 @@ public class CustomEntityProjectile extends Entity {
         dy += random.nextGaussian() * spread;
         dz += random.nextGaussian() * spread;
 
-        final double mul = ServerFlag.SERVER_TICKS_PER_SECOND * power;
+        final double mul = ServerProperties.SERVER_TICKS_PER_SECOND.get() * power;
         this.velocity = new Vec(dx * mul, dy * mul, dz * mul);
         setView(
                 (float) Math.toDegrees(Math.atan2(dx, dz)),
@@ -186,7 +186,7 @@ public class CustomEntityProjectile extends Entity {
         Point collidedBlockVec = collidedPoint.asBlockVec();
         Block block = instance.getBlock(collidedPoint);
 
-        return !block.registry().collisionShape().intersectBox(collidedPoint.sub(collidedBlockVec).sub(0, 0.6, 0), UNSTUCK_BOX);
+        return !block.collisionShape().intersectBox(collidedPoint.sub(collidedBlockVec).sub(0, 0.6, 0), UNSTUCK_BOX);
     }
 
     protected boolean canHit(Entity entity) {
@@ -213,7 +213,7 @@ public class CustomEntityProjectile extends Entity {
         if (vehicle != null) return;
 
         if (!isStuck()) {
-            Vec diff = velocity.div(ServerFlag.SERVER_TICKS_PER_SECOND);
+            Vec diff = velocity.div(ServerProperties.SERVER_TICKS_PER_SECOND.get());
             // Prevent entity infinitely in the void
             if (instance.isInVoid(position)) {
                 scheduler().scheduleNextProcess(this::remove);
@@ -288,7 +288,7 @@ public class CustomEntityProjectile extends Entity {
                     aerodynamics.horizontalAirResistance(),
                     aerodynamics.verticalAirResistance(),
                     aerodynamics.horizontalAirResistance()
-            ).sub(0, hasNoGravity() ? 0 : getAerodynamics().gravity() * ServerFlag.SERVER_TICKS_PER_SECOND, 0);
+            ).sub(0, hasNoGravity() ? 0 : getAerodynamics().gravity() * ServerProperties.SERVER_TICKS_PER_SECOND.get(), 0);
             onGround = physicsResult.isOnGround();
 
             float yaw = position.yaw();

@@ -121,7 +121,7 @@ public class VanillaFallFeature implements FallFeature, RegistrableFeature {
 		
 		double safeFallDistance = entity.getAttributeValue(Attribute.SAFE_FALL_DISTANCE);
 		if (newFallDistance > safeFallDistance) {
-			if (!block.isAir()) {
+			if (!block.air()) {
 				double damageDistance = Math.ceil(newFallDistance - safeFallDistance);
 				double particleMultiplier = Math.min(0.2 + damageDistance / 15.0, 2.5);
 				int particleCount = (int) (150 * particleMultiplier);
@@ -185,7 +185,7 @@ public class VanillaFallFeature implements FallFeature, RegistrableFeature {
 		Instance instance = livingEntity.getInstance();
 		
 		if (instance == null) return offset;
-		if (!instance.getBlock(offset).isAir()) return offset;
+		if (!instance.getBlock(offset).air()) return offset;
 		
 		Point offsetDown = offset.add(0, -1, 0);
 		Block block = instance.getBlock(offsetDown);

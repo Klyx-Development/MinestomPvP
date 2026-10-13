@@ -89,7 +89,7 @@ public class VanillaExplosiveFeature implements ExplosiveFeature, RegistrableFea
 			if (!block.compare(Block.OBSIDIAN) && !block.compare(Block.BEDROCK)) return;
 
 			Point above = event.getPosition().add(0, 1, 0);
-			if (!instance.getBlock(above).isAir()) return;
+			if (!instance.getBlock(above).air()) return;
 
 			BoundingBox checkIntersect = new BoundingBox(1, 2, 1);
 			for (Entity entity : instance.getNearbyEntities(above, 3)) {

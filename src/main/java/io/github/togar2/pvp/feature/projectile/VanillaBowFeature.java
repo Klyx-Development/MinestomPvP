@@ -12,7 +12,6 @@ import io.github.togar2.pvp.feature.enchantment.EnchantmentFeature;
 import io.github.togar2.pvp.feature.item.ItemDamageFeature;
 import io.github.togar2.pvp.utils.ViewUtil;
 import net.kyori.adventure.sound.Sound;
-import net.minestom.server.ServerFlag;
 import net.minestom.server.component.DataComponents;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
@@ -26,6 +25,7 @@ import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.item.component.EnchantmentList;
 import net.minestom.server.item.enchant.Enchantment;
+import net.minestom.server.property.ServerProperties;
 import net.minestom.server.sound.SoundEvent;
 import org.jetbrains.annotations.Nullable;
 
@@ -112,7 +112,7 @@ public class VanillaBowFeature implements BowFeature, RegistrableFeature {
 			if (punchEnchantment > 0) arrow.setKnockback(punchEnchantment);
 			
 			if (enchantmentList.level(Enchantment.FLAME) > 0)
-				arrow.setFireTicksLeft(100 * ServerFlag.SERVER_TICKS_PER_SECOND); // 100 seconds
+				arrow.setFireTicksLeft(100 * ServerProperties.SERVER_TICKS_PER_SECOND.get()); // 100 seconds
 			
 			itemDamageFeature.damageEquipment(player, event.getHand() == PlayerHand.MAIN ?
 					EquipmentSlot.MAIN_HAND : EquipmentSlot.OFF_HAND, 1);
@@ -146,7 +146,7 @@ public class VanillaBowFeature implements BowFeature, RegistrableFeature {
 	}
 	
 	protected double getBowPower(long ticks) {
-		double seconds = ticks / (double) ServerFlag.SERVER_TICKS_PER_SECOND;
+		double seconds = ticks / (double) ServerProperties.SERVER_TICKS_PER_SECOND.get();
 		double power = (seconds * seconds + seconds * 2.0) / 3.0;
 		if (power > 1) {
 			power = 1;
