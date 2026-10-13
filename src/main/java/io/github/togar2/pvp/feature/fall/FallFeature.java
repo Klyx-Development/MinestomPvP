@@ -1,7 +1,9 @@
 package io.github.togar2.pvp.feature.fall;
 
 import io.github.togar2.pvp.feature.CombatFeature;
+import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.LivingEntity;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Combat feature which manages the fall distance and fall damage of entities.
@@ -33,4 +35,10 @@ public interface FallFeature extends CombatFeature {
 	void resetFallDistance(LivingEntity entity);
 	
 	void setExtraFallParticles(LivingEntity entity, boolean extraFallParticles);
+
+	default void ignoreFallDamageFromImpulse(LivingEntity entity, Point impactPosition) {}
+
+	default @Nullable Point getImpulseImpactPosition(LivingEntity entity) {
+		return null;
+	}
 }

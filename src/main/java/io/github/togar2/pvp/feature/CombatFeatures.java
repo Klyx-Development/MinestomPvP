@@ -24,8 +24,15 @@ import io.github.togar2.pvp.feature.food.VanillaRegenerationFeature;
 import io.github.togar2.pvp.feature.item.VanillaItemDamageFeature;
 import io.github.togar2.pvp.feature.knockback.FairKnockbackFeature;
 import io.github.togar2.pvp.feature.knockback.VanillaKnockbackFeature;
+import io.github.togar2.pvp.feature.mace.VanillaMaceFeature;
 import io.github.togar2.pvp.feature.potion.VanillaPotionFeature;
-import io.github.togar2.pvp.feature.projectile.*;
+import io.github.togar2.pvp.feature.projectile.VanillaBowFeature;
+import io.github.togar2.pvp.feature.projectile.VanillaCrossbowFeature;
+import io.github.togar2.pvp.feature.projectile.VanillaFireworkRocketFeature;
+import io.github.togar2.pvp.feature.projectile.VanillaFishingRodFeature;
+import io.github.togar2.pvp.feature.projectile.VanillaMiscProjectileFeature;
+import io.github.togar2.pvp.feature.projectile.VanillaProjectileItemFeature;
+import io.github.togar2.pvp.feature.projectile.VanillaTridentFeature;
 import io.github.togar2.pvp.feature.provider.DifficultyProvider;
 import io.github.togar2.pvp.feature.spectate.VanillaSpectateFeature;
 import io.github.togar2.pvp.feature.state.VanillaPlayerStateFeature;
@@ -182,6 +189,10 @@ public class CombatFeatures {
      * @see VanillaFireworkRocketFeature
      */
     public static final DefinedFeature<VanillaFireworkRocketFeature> VANILLA_FIREWORK_ROCKET = VanillaFireworkRocketFeature.DEFINED;
+    /**
+     * @see VanillaMaceFeature
+     */
+    public static final DefinedFeature<VanillaMaceFeature> VANILLA_MACE = VanillaMaceFeature.DEFINED;
 
     private static final List<DefinedFeature<?>> VANILLA = List.of(
             VANILLA_ARMOR, VANILLA_ATTACK, VANILLA_CRITICAL, VANILLA_SWEEPING,
@@ -191,7 +202,7 @@ public class CombatFeatures {
             VANILLA_REGENERATION, VANILLA_ITEM_DAMAGE, VANILLA_KNOCKBACK, VANILLA_POTION,
             VANILLA_BOW, VANILLA_CROSSBOW, VANILLA_FISHING_ROD, VANILLA_MISC_PROJECTILE,
             VANILLA_PROJECTILE_ITEM, VANILLA_TRIDENT, VANILLA_SPECTATE, VANILLA_PLAYER_STATE,
-            VANILLA_TOTEM, VANILLA_DEATH_MESSAGE, VANILLA_FIREWORK_ROCKET
+            VANILLA_TOTEM, VANILLA_DEATH_MESSAGE, VANILLA_FIREWORK_ROCKET, VANILLA_MACE
     );
 
     private static final CombatFeatureSet MODERN_VANILLA = getVanilla(CombatVersion.MODERN, DifficultyProvider.DEFAULT).build();

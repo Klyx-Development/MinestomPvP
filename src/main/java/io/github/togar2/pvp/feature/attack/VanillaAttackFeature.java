@@ -1,6 +1,7 @@
 package io.github.togar2.pvp.feature.attack;
 
 import io.github.togar2.pvp.enchantment.EntityGroup;
+import io.github.togar2.pvp.entity.projectile.WindCharge;
 import io.github.togar2.pvp.enums.Tool;
 import io.github.togar2.pvp.events.FinalAttackEvent;
 import io.github.togar2.pvp.events.PrepareAttackEvent;
@@ -13,14 +14,18 @@ import io.github.togar2.pvp.feature.enchantment.EnchantmentFeature;
 import io.github.togar2.pvp.feature.food.ExhaustionFeature;
 import io.github.togar2.pvp.feature.item.ItemDamageFeature;
 import io.github.togar2.pvp.feature.knockback.KnockbackFeature;
+import io.github.togar2.pvp.feature.mace.MaceFeature;
 import io.github.togar2.pvp.player.CombatPlayer;
 import io.github.togar2.pvp.utils.CombatVersion;
 import io.github.togar2.pvp.utils.ViewUtil;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.sound.Sound;
-import net.minestom.server.ServerFlag;
 import net.minestom.server.coordinate.Pos;
-import net.minestom.server.entity.*;
+import net.minestom.server.entity.Entity;
+import net.minestom.server.entity.EquipmentSlot;
+import net.minestom.server.entity.GameMode;
+import net.minestom.server.entity.LivingEntity;
+import net.minestom.server.entity.Player;
 import net.minestom.server.entity.attribute.Attribute;
 import net.minestom.server.entity.damage.Damage;
 import net.minestom.server.entity.damage.DamageType;
@@ -28,6 +33,7 @@ import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.entity.EntityAttackEvent;
 import net.minestom.server.event.trait.EntityInstanceEvent;
+import net.minestom.server.item.Material;
 import net.minestom.server.network.packet.server.play.EntityAnimationPacket;
 import net.minestom.server.network.packet.server.play.ParticlePacket;
 import net.minestom.server.particle.Particle;
@@ -47,7 +53,7 @@ public class VanillaAttackFeature implements AttackFeature, RegistrableFeature {
 	public static final DefinedFeature<VanillaAttackFeature> DEFINED = new DefinedFeature<>(
 		FeatureType.ATTACK, VanillaAttackFeature::new,
 		FeatureType.ATTACK_COOLDOWN, FeatureType.EXHAUSTION, FeatureType.ITEM_DAMAGE,
-		FeatureType.ENCHANTMENT, FeatureType.CRITICAL, FeatureType.SWEEPING, FeatureType.KNOCKBACK, FeatureType.VERSION
+		FeatureType.ENCHANTMENT, FeatureType.CRITICAL, FeatureType.SWEEPING, FeatureType.KNOCKBACK, FeatureType.MACE, FeatureType.VERSION
 	);
 
 	private static final double ATTACK_RANGE_MARGIN = 3.0;
@@ -62,6 +68,7 @@ public class VanillaAttackFeature implements AttackFeature, RegistrableFeature {
 	private CriticalFeature criticalFeature;
 	private SweepingFeature sweepingFeature;
 	private KnockbackFeature knockbackFeature;
+	private MaceFeature maceFeature;
 
 	private CombatVersion version;
 
@@ -78,6 +85,7 @@ public class VanillaAttackFeature implements AttackFeature, RegistrableFeature {
 		this.criticalFeature = configuration.get(FeatureType.CRITICAL);
 		this.sweepingFeature = configuration.get(FeatureType.SWEEPING);
 		this.knockbackFeature = configuration.get(FeatureType.KNOCKBACK);
+		this.maceFeature = configuration.get(FeatureType.MACE);
 		this.version = configuration.get(FeatureType.VERSION);
 	}
 
@@ -98,15 +106,29 @@ public class VanillaAttackFeature implements AttackFeature, RegistrableFeature {
 		PrepareAttackEvent prepareAttackEvent = new PrepareAttackEvent(attacker, target);
 		EventDispatcher.call(prepareAttackEvent);
 		if (prepareAttackEvent.isCancelled()) return false;
+		
+		if (target instanceof WindCharge windCharge && windCharge.deflect(attacker)) {
+			if (attacker instanceof Player player) cooldownFeature.resetCooldownProgress(player);
+
+			ViewUtil.viewersAndSelf(attacker).playSound(Sound.sound(
+				SoundEvent.ENTITY_PLAYER_ATTACK_NODAMAGE, Sound.Source.PLAYER,
+				1.0f, 1.0f
+			), attacker);
+
+			return false;
+		}
 		AttackValues.Final attack = prepareAttack(attacker, target);
 		if (attack == null) return false; // Event cancelled
 
+		boolean smashAttack = maceFeature.canSmashAttack(attacker);
+		
 		float originalHealth = 0;
 		boolean damageSucceeded = false;
 		if (target instanceof LivingEntity livingTarget) {
 			originalHealth = livingTarget.getHealth();
 			damageSucceeded = livingTarget.damage(new Damage(
-				attacker instanceof Player ? DamageType.PLAYER_ATTACK : DamageType.MOB_ATTACK,
+				smashAttack ? DamageType.MACE_SMASH :
+					attacker instanceof Player ? DamageType.PLAYER_ATTACK : DamageType.MOB_ATTACK,
 				attacker, attacker,
 				null, attack.damage()
 			));
@@ -176,6 +198,8 @@ public class VanillaAttackFeature implements AttackFeature, RegistrableFeature {
 			EntityAnimationPacket.Animation.MAGICAL_CRITICAL_EFFECT
 		));
 
+		if (smashAttack) maceFeature.onSmashAttack(attacker, living);
+		
 		for (LivingEntity affectedEntity : affectedEntities) {
 			// Thorns
 			enchantmentFeature.onUserDamaged(affectedEntity, attacker);
@@ -190,8 +214,12 @@ public class VanillaAttackFeature implements AttackFeature, RegistrableFeature {
 
 		// Damage item
 		Tool tool = Tool.fromMaterial(attacker.getItemInMainHand().material());
-		if (tool != null) itemDamageFeature.damageEquipment(attacker, EquipmentSlot.MAIN_HAND,
-			(tool.isSword() || tool == Tool.TRIDENT) ? 1 : 2);
+		if (tool != null) {
+			itemDamageFeature.damageEquipment(attacker, EquipmentSlot.MAIN_HAND,
+					(tool.isSword() || tool == Tool.TRIDENT) ? 1 : 2);
+		} else if (attacker.getItemInMainHand().material() == Material.MACE) {
+			itemDamageFeature.damageEquipment(attacker, EquipmentSlot.MAIN_HAND, 1);
+		}
 
 		// Damage indicator particles
 		float damageDone = originalHealth - living.getHealth();
@@ -234,6 +262,9 @@ public class VanillaAttackFeature implements AttackFeature, RegistrableFeature {
 		boolean sprintAttack = attacker.isSprinting() && strongAttack;
 		int knockback = enchantmentFeature.getKnockback(attacker);
 		int fireAspect = enchantmentFeature.getFireAspect(attacker);
+		
+		// Mace smash attack bonus
+		damage += maceFeature.getSmashDamageBonus(attacker, target);
 
 		// Use features to determine critical and sweeping
 		AttackValues.PreCritical preCritical = new AttackValues.PreCritical(

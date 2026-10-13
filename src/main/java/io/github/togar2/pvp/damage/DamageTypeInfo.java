@@ -62,6 +62,7 @@ public record DamageTypeInfo(boolean damagesHelmet, boolean bypassesArmor, boole
 			put(DamageType.ARROW, new DamageTypeInfo().projectile(true).scale(ScaleWithDifficulty.WHEN_CAUSED_BY_LIVING_NON_PLAYER));
 			put(DamageType.WITHER_SKULL, new DamageTypeInfo().projectile(true).scale(ScaleWithDifficulty.WHEN_CAUSED_BY_LIVING_NON_PLAYER));
 			put(DamageType.THROWN, new DamageTypeInfo().projectile(true).scale(ScaleWithDifficulty.WHEN_CAUSED_BY_LIVING_NON_PLAYER));
+			put(DamageType.WIND_CHARGE, new DamageTypeInfo().projectile(true).scale(ScaleWithDifficulty.WHEN_CAUSED_BY_LIVING_NON_PLAYER));
 			put(DamageType.STING, new DamageTypeInfo().scale(ScaleWithDifficulty.WHEN_CAUSED_BY_LIVING_NON_PLAYER));
 			put(DamageType.MOB_ATTACK, new DamageTypeInfo().scale(ScaleWithDifficulty.WHEN_CAUSED_BY_LIVING_NON_PLAYER));
 			put(DamageType.MOB_PROJECTILE, new DamageTypeInfo().scale(ScaleWithDifficulty.WHEN_CAUSED_BY_LIVING_NON_PLAYER));

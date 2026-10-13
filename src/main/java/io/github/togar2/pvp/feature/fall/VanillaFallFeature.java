@@ -27,6 +27,7 @@ import net.minestom.server.potion.PotionEffect;
 import net.minestom.server.registry.Registries;
 import net.minestom.server.sound.SoundEvent;
 import net.minestom.server.tag.Tag;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Vanilla implementation of {@link FallFeature}
@@ -40,6 +41,10 @@ public class VanillaFallFeature implements FallFeature, RegistrableFeature {
 	
 	public static final Tag<Double> FALL_DISTANCE = Tag.Transient("fallDistance");
 	public static final Tag<Boolean> EXTRA_FALL_PARTICLES = Tag.Transient("extraFallParticles");
+	public static final Tag<Point> IMPULSE_IMPACT_POSITION = Tag.Transient("impulseImpactPosition");
+	public static final Tag<Long> IMPULSE_GRACE_END = Tag.Transient("impulseGraceEnd");
+	
+	public static final int IMPULSE_GRACE_TICKS = 40;
 	
 	private final FeatureConfiguration configuration;
 	
@@ -138,9 +143,18 @@ public class VanillaFallFeature implements FallFeature, RegistrableFeature {
 		
 		entity.setTag(FALL_DISTANCE, 0.0);
 		
+		double effectiveFallDistance = newFallDistance;
+		Point impactPosition = getImpulseImpactPosition(entity);
+		if (impactPosition != null) {
+			effectiveFallDistance = Math.min(newFallDistance, impactPosition.y() - newPos.y());
+			if (effectiveFallDistance <= 0 || entity.getAliveTicks() >= entity.getTag(IMPULSE_GRACE_END))
+				resetImpulse(entity);
+		}
+		
 		if (entity instanceof Player player && player.getGameMode().invulnerable()) return;
-		int damage = getFallDamage(entity, newFallDistance);
+		int damage = getFallDamage(entity, effectiveFallDistance);
 		if (damage > 0) {
+			resetImpulse(entity);
 			playFallSound(entity, damage);
 			entity.damage(DamageType.FALL, damage);
 		}
@@ -178,6 +192,27 @@ public class VanillaFallFeature implements FallFeature, RegistrableFeature {
 	public void setExtraFallParticles(LivingEntity entity, boolean extraFallParticles) {
 		if (extraFallParticles) entity.setTag(EXTRA_FALL_PARTICLES, true);
 		else entity.removeTag(EXTRA_FALL_PARTICLES);
+	}
+	
+	@Override
+	public void ignoreFallDamageFromImpulse(LivingEntity entity, Point impactPosition) {
+		long graceEnd = entity.getAliveTicks() + IMPULSE_GRACE_TICKS;
+		if (entity.hasTag(IMPULSE_GRACE_END)) {
+			graceEnd = Math.max(graceEnd, entity.getTag(IMPULSE_GRACE_END));
+		}
+
+		entity.setTag(IMPULSE_GRACE_END, graceEnd);
+		entity.setTag(IMPULSE_IMPACT_POSITION, impactPosition);
+	}
+	
+	@Override
+	public @Nullable Point getImpulseImpactPosition(LivingEntity entity) {
+		return entity.getTag(IMPULSE_IMPACT_POSITION);
+	}
+	
+	protected void resetImpulse(LivingEntity entity) {
+		entity.removeTag(IMPULSE_IMPACT_POSITION);
+		entity.removeTag(IMPULSE_GRACE_END);
 	}
 	
 	protected Point getLandingPos(LivingEntity livingEntity, Pos position) {

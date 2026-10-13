@@ -7,9 +7,12 @@ import io.github.togar2.pvp.feature.config.FeatureConfiguration;
 import io.github.togar2.pvp.feature.enchantment.EnchantmentFeature;
 import io.github.togar2.pvp.utils.CombatVersion;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.component.DataComponents;
 import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.attribute.Attribute;
-import net.minestom.server.entity.damage.DamageType;
+import net.minestom.server.entity.damage.Damage;
+import net.minestom.server.item.component.EnchantmentList;
+import net.minestom.server.item.enchant.Enchantment;
 import net.minestom.server.potion.PotionEffect;
 import net.minestom.server.potion.TimedPotion;
 import net.minestom.server.utils.MathUtils;
@@ -38,16 +41,26 @@ public class VanillaArmorFeature implements ArmorFeature {
 	}
 	
 	@Override
-	public float getDamageWithProtection(LivingEntity entity, DamageType type, float amount) {
-		DamageTypeInfo info = DamageTypeInfo.of(MinecraftServer.getDamageTypeRegistry().getKey(type));
-		amount = getDamageWithArmor(entity, info, amount);
-		return getDamageWithEnchantments(entity, type, amount);
+	public float getDamageWithProtection(LivingEntity entity, Damage damage, float amount) {
+		amount = getDamageWithArmor(entity, damage, amount);
+		return getDamageWithEnchantments(entity, damage, amount);
 	}
 	
-	protected float getDamageWithArmor(LivingEntity entity, DamageTypeInfo typeInfo, float amount) {
+	protected float getDamageWithArmor(LivingEntity entity, Damage damage, float amount) {
+		DamageTypeInfo typeInfo = DamageTypeInfo.of(damage.getType());
 		if (typeInfo.bypassesArmor()) return amount;
 		
 		double armorValue = entity.getAttributeValue(Attribute.ARMOR);
+		if (damage.getAttacker() instanceof LivingEntity attacker) {
+			EnchantmentList enchantmentList = attacker.getItemInMainHand().get(DataComponents.ENCHANTMENTS);
+			if (enchantmentList != null && enchantmentList.has(Enchantment.BREACH)) {
+				int breachLevel = enchantmentList.level(Enchantment.BREACH);
+				if (breachLevel > 0) {
+					armorValue *= (1.0 - (0.15 * breachLevel));
+				}
+			}
+		}
+
 		if (version.legacy()) {
 			int armorMultiplier = 25 - (int) armorValue;
 			return (amount * (float) armorMultiplier) / 25;
@@ -59,9 +72,9 @@ public class VanillaArmorFeature implements ArmorFeature {
 		}
 	}
 	
-	protected float getDamageWithEnchantments(LivingEntity entity, DamageType damageType, float amount) {
-		DamageTypeInfo damageTypeInfo = DamageTypeInfo.of(MinecraftServer.getDamageTypeRegistry().getKey(damageType));
-		if (damageTypeInfo.unblockable()) return amount;
+	protected float getDamageWithEnchantments(LivingEntity entity, Damage damage, float amount) {
+		DamageTypeInfo typeInfo = DamageTypeInfo.of(damage.getType());
+		if (typeInfo.unblockable()) return amount;
 		
 		int k;
 		TimedPotion effect = entity.getEffect(PotionEffect.RESISTANCE);
@@ -75,7 +88,7 @@ public class VanillaArmorFeature implements ArmorFeature {
 		if (amount <= 0) {
 			return 0;
 		} else {
-			k = enchantmentFeature.getProtectionAmount(entity, damageType);
+			k = enchantmentFeature.getProtectionAmount(entity, MinecraftServer.getDamageTypeRegistry().get(damage.getType()));
 			if (version.modern()) {
 				if (k > 0) {
 					amount = getDamageAfterProtectionEnchantment(amount, (float) k);
